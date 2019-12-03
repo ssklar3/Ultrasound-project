@@ -7,13 +7,11 @@ width=354;
 mid=ceil([length,width]./2);
 mat=zeros(length,width,numFrames);
 vidfile = VideoWriter('newfile2.avi','Motion JPEG AVI');
-vidfile.FrameRate = 1;
+vidfile.FrameRate = 2;
 open(vidfile);
-% vidfile.FrameRate=5;
 for i=1:numFrames
     vidFrame = readFrame(v);
     I = rgb2gray(vidFrame);
-%     imshow( I );
     mat(:,:,i)=im2double(I);
 end
 mask=zeros(size(mat(:,:,1)));
@@ -35,35 +33,24 @@ for i=1:length
 end
 % figure
 % imshow((mat(:,:,1).*mask))
-% imagesc((mat(:,:,1).*mask))
-% cmap=contrast(mat(:,:,1));
-% colormap(cmap);
-% mat=mat-.7;
-%mat=(mat-mean(mat,3));
-
-
-%mat( mat <= 0 ) = 0;
+% mat=mat-.1;
+% %mat=(mat-mean(mat,3));
+% mat( mat <= 0 ) = 0;
 
 border=35;
 ore=[1,1];
 
-checksize=20;
+checksize=25;
 for f=1:numFrames-1
 ydiff=zeros(length-2*border,width-2*border);
 xdiff=zeros(length-2*border,width-2*border);
     f
     for i=1+border:1:length-border
-    %     if i>mid(2)
-    %         ore(2)=-1;
-    %     end
         posi=[i-checksize,i+ore(2)*checksize];
         if posi(2)<posi(1)
             posi=[posi(2),posi(1)];
         end
         for k=1+border:1:width-border
-    %         if k>mid(1)
-    %             ore(1)=-1;
-    %         end
             posk=[k-checksize,k+ore(1)*checksize];
             if mask (i,k) == 1
                 if posk(2)<posk(1)
@@ -89,9 +76,9 @@ xdiff=zeros(length-2*border,width-2*border);
         end
         ore(2)=1;
     end
-    % PSF  = fspecial('gaussian',15,3)./(max(max(PSF)));
-    % xdiff=conv2(xdiff,PSF,'same');
-    % ydiff=conv2(ydiff,PSF,'same');
+%     PSF  = fspecial('gaussian',6,2);
+%     xdiff=conv2(xdiff,PSF,'same');
+%     ydiff=conv2(ydiff,PSF,'same');
     %%
     figure;
     imshow((mat(:,:,f)))
@@ -103,7 +90,5 @@ xdiff=zeros(length-2*border,width-2*border);
     F = getframe(gcf);
     writeVideo(vidfile, F.cdata(36:36+length,108:108+width,:));
     close
-%     figure
-%     imagesc(F.cdata(36:36+length,108:108+width))
 end
 close(vidfile)

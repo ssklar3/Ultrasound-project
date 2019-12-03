@@ -6,55 +6,104 @@ length=345;
 width=354;
 mid=ceil([length,width]./2);
 mat=zeros(length,width,numFrames);
+vidfile = VideoWriter('newfile2.avi','Motion JPEG AVI');
+vidfile.FrameRate = 1;
+open(vidfile);
+% vidfile.FrameRate=5;
 for i=1:numFrames
     vidFrame = readFrame(v);
     I = rgb2gray(vidFrame);
 %     imshow( I );
     mat(:,:,i)=im2double(I);
 end
-border=50;
+mask=zeros(size(mat(:,:,1)));
+for i=1:length
+    for k=1:width
+        check=((i-mid(1)+30).^2)+((k-mid(2)+30).^2);
+        if check<1.2e4
+            mask(i,k)=1;
+        end
+    end
+end
+for i=1:length
+    for k=1:width
+        check=((i-mid(1)+30).^2)+((k-mid(2)+30).^2);
+        if check<.2e4
+            mask(i,k)=0;
+        end
+    end
+end
+% figure
+% imshow((mat(:,:,1).*mask))
+% imagesc((mat(:,:,1).*mask))
+% cmap=contrast(mat(:,:,1));
+% colormap(cmap);
+% mat=mat-.7;
+%mat=(mat-mean(mat,3));
+
+
+%mat( mat <= 0 ) = 0;
+
+border=35;
 ore=[1,1];
+
+checksize=20;
+for f=1:numFrames-1
 ydiff=zeros(length-2*border,width-2*border);
 xdiff=zeros(length-2*border,width-2*border);
-checksize=27;
-
-for i=1+border:length-border
-    i
-%     if i>mid(2)
-%         ore(2)=-1;
-%     end
-    posi=[i,i+ore(2)*checksize];
-    if posi(2)<posi(1)
-        posi=[posi(2),posi(1)];
-    end
-    for k=1+border:width-border
-%         if k>mid(1)
-%             ore(1)=-1;
-%         end
-        posk=[k,k+ore(1)*checksize];
-        if posk(2)<posk(1)
-            posk=[posk(2),posk(1)];
+    f
+    for i=1+border:1:length-border
+    %     if i>mid(2)
+    %         ore(2)=-1;
+    %     end
+        posi=[i-checksize,i+ore(2)*checksize];
+        if posi(2)<posi(1)
+            posi=[posi(2),posi(1)];
         end
-        ref=mat(posi(1):posi(2),posk(1):posk(2),1);
-        mSAD=inf;
-            for j=-5:5
-                cposi=posi+j;
-                for m=-5:5
-                    cposk=posk+m;
-                    SAD=sum(sum(abs(ref-...
-                        mat(cposi(1):cposi(2),cposk(1):cposk(2),4))));
-                    if SAD<mSAD
-                        mSAD=SAD;
-                        ydiff(i,k)=j;
-                        xdiff(i,k)=m;
-                    end
+        for k=1+border:1:width-border
+    %         if k>mid(1)
+    %             ore(1)=-1;
+    %         end
+            posk=[k-checksize,k+ore(1)*checksize];
+            if mask (i,k) == 1
+                if posk(2)<posk(1)
+                    posk=[posk(2),posk(1)];
                 end
+                ref=mat(posi(1):posi(2),posk(1):posk(2),f);
+                mSAD=inf;
+                    for j=[0,-5:-1,1:5]
+                        cposi=posi+j;
+                        for m=[0,-5:-1,1:5]
+                            cposk=posk+m;
+                            SAD=sum(sum(abs(ref-...
+                                mat(cposi(1):cposi(2),cposk(1):cposk(2),f+1))));
+                            if SAD<mSAD
+                                mSAD=SAD;
+                                ydiff(i,k)=j;
+                                xdiff(i,k)=m;
+                            end
+                        end
+                    end
             end
-        ore(1)=1;
+            ore(1)=1;
+        end
+        ore(2)=1;
     end
-    ore(2)=1;
+    % PSF  = fspecial('gaussian',15,3)./(max(max(PSF)));
+    % xdiff=conv2(xdiff,PSF,'same');
+    % ydiff=conv2(ydiff,PSF,'same');
+    %%
+    figure;
+    imshow((mat(:,:,f)))
+    hold on
+    spacing=20;
+    quiver(1:spacing:size(xdiff,2),1:spacing:size(xdiff,1),xdiff(1:spacing:end,1:spacing:end),ydiff(1:spacing:end,1:spacing:end),1,'color',[0 .8 0])
+    set(gca, 'YDir','reverse')
+    hold off
+    F = getframe(gcf);
+    writeVideo(vidfile, F.cdata(36:36+length,108:108+width,:));
+    close
+%     figure
+%     imagesc(F.cdata(36:36+length,108:108+width))
 end
-%%
-figure;
-quiver(1:size(xdiff,2),1:size(xdiff,1),xdiff,ydiff)
-set(gca, 'YDir','reverse')
+close(vidfile)

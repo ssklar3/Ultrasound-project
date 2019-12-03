@@ -5,7 +5,7 @@ matr=matr.Q;
 A=matr(500:800,500:1000);
 length=size(A,1);
 width=size(A,2);
-shift=[0,0];
+shift=[3,-2];
 Amod = circshift(A,shift);
 % uncoment to shift in two directions
 % Amod(1:150,:)=circshift(A(1:150,:),[0,1]);
@@ -14,7 +14,7 @@ border=50;
 ore=[1,1];
 ydiff=zeros(length-2*border,width-2*border);
 xdiff=zeros(length-2*border,width-2*border);
-checksize=27;
+checksize=10;
 
 for i=1+border:length-border
     i

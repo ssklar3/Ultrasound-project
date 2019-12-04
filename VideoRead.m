@@ -37,11 +37,11 @@ end
 % %mat=(mat-mean(mat,3));
 % mat( mat <= 0 ) = 0;
 
-border=35;
+border=50;
 ore=[1,1];
 
-checksize=25;
-for f=1:numFrames-1
+checksize=35;
+for f=1:2:numFrames-1
 ydiff=zeros(length-2*border,width-2*border);
 xdiff=zeros(length-2*border,width-2*border);
     f
@@ -63,7 +63,7 @@ xdiff=zeros(length-2*border,width-2*border);
                         for m=[0,-5:-1,1:5]
                             cposk=posk+m;
                             SAD=sum(sum(abs(ref-...
-                                mat(cposi(1):cposi(2),cposk(1):cposk(2),f+1))));
+                                mat(cposi(1):cposi(2),cposk(1):cposk(2),f+2))));
                             if SAD<mSAD
                                 mSAD=SAD;
                                 ydiff(i,k)=j;

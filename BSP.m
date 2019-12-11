@@ -94,7 +94,7 @@ xdiff=zeros(length-2*border,width-2*border);
         end
     end
     %%
-    figure;
+    figure('visible','off');
     imshow((mat(:,:,f)))
     hold on
     spacing=10;
